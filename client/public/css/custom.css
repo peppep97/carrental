@@ -1,9 +1,60 @@
 .navbar {
     background-color: #2196f3;
 }
-.navbar svg{
+
+.navbar svg {
     margin-right: 0.3em;
 }
-.custom-container{
-    margin-top: 1em;
+
+/* .custom-container {
+    padding-top: 1em;
+} */
+
+.custom-container>.row {
+    display: flex;
+    flex-flow: column;
+    align-items: flex-start;
+    height: 100vh;
+}
+
+.custom-container>.row h2{
+    padding-top: 60px;
+}
+
+
+.custom-container>.row .spinner-border {
+    align-self: center;
+    margin-top: 20em;
+    width: 3rem;
+    height: 3rem
+}
+
+/* add padding-top to body due to fixed top navbar */
+
+/* body {
+    padding-top: 60px;
+}
+
+@media screen and (max-width: 767px) {
+    body {
+        padding-top: 60px;
+    }
+}
+
+@media screen and (min-width:768px) and (max-width: 991px) {
+    body {
+        padding-top: 110px;
+    }
+}
+
+@media screen and (min-width: 992px) {
+    body {
+        padding-top: 60px;
+    }
+} */
+
+.table-wrapper {
+    overflow: auto;
+    width: 100%;
+    margin-bottom: 20px;
 }

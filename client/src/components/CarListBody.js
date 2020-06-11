@@ -1,44 +1,50 @@
 import React, { useState, useEffect } from 'react';
-
+import API from '../API';
 import Table from 'react-bootstrap/Table';
+import Spinner from 'react-bootstrap/Spinner';
 
 function CarListBody() {
-    const [data, setData] = useState({ list: [] });
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        console.log("ciao");
-    });
+        setLoading(true);
+        API.getCarList()
+        .then((cars) => {
+            setData(cars);
+        });
+        setLoading(false);
+    }, []);
 
-    return <Table striped bordered hover>
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Brand</th>
-                <th>Model</th>
-                <th>Category</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>1</td>
-                <td>Mark</td>
-                <td>Otto</td>
-                <td>@mdo</td>
-            </tr>
-            <tr>
-                <td>2</td>
-                <td>Jacob</td>
-                <td>Thornton</td>
-                <td>@fat</td>
-            </tr>
-            <tr>
-                <td>3</td>
-                <td colSpan="2">Larry the Bird</td>
-                <td>@twitter</td>
-            </tr>
-        </tbody>
-    </Table>
 
+
+    if (loading)
+        return <Spinner animation="border" variant="primary" />
+
+    return <><h2>Car List</h2>
+    <div className="table-wrapper">
+        <Table striped bordered hover size="sm">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Brand</th>
+                    <th>Model</th>
+                    <th>Category</th>
+                </tr>
+            </thead>
+            <tbody>
+                {data != null ? data.map((e) => <CarRow key={e.id} car={e} />) : ''}
+            </tbody>
+        </Table></div></>
+}
+
+function CarRow(props) {
+    return <tr>
+        <td>{props.car.id}</td>
+        <td>{props.car.brand}</td>
+        <td>{props.car.model}</td>
+        <td>{props.car.category}</td>
+    </tr>
 }
 
 export default CarListBody;

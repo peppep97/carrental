@@ -9,7 +9,7 @@ import { faCar } from '@fortawesome/free-solid-svg-icons'
 
 function NavBar(props){
 
-    return <Navbar expand="lg" variant="dark">
+    return <Navbar expand="lg" variant="dark" fixed="top">
     <Navbar.Brand href="#home"><FontAwesomeIcon icon={faCar} />Car Rental</Navbar.Brand>
     <Navbar.Toggle aria-controls="basic-navbar-nav" />
     <Navbar.Collapse id="basic-navbar-nav">

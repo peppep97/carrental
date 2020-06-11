@@ -14,7 +14,7 @@ import {
 
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
-import Spinner from 'react-bootstrap/Spinner';
+import Col from 'react-bootstrap/Col';
 
 class App extends React.Component {
 
@@ -31,7 +31,6 @@ class App extends React.Component {
           <Route path="/">
             <Container className="custom-container">
               <Row>
-                <h1>Car List</h1>
                 <CarListBody></CarListBody>
               </Row>
             </Container>
