@@ -5,12 +5,13 @@ import Nav from 'react-bootstrap/Nav';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCar } from '@fortawesome/free-solid-svg-icons'
+import { faCar, faSignInAlt, faUser, faSignOutAlt } from '@fortawesome/free-solid-svg-icons'
+import { Link } from 'react-router-dom/cjs/react-router-dom.min';
 
-function NavBar(props){
+function NavBar(props) {
 
-    return <Navbar expand="lg" variant="dark" fixed="top">
-    <Navbar.Brand href="#home"><FontAwesomeIcon icon={faCar} />Car Rental</Navbar.Brand>
+  return <Navbar expand="lg" variant="dark" fixed="top">
+    <Link to="/" className="navbar-brand"><FontAwesomeIcon icon={faCar} />Car Rental</Link>
     <Navbar.Toggle aria-controls="basic-navbar-nav" />
     <Navbar.Collapse id="basic-navbar-nav">
       <Nav className="mr-auto">
@@ -23,6 +24,13 @@ function NavBar(props){
           <NavDropdown.Divider />
           <NavDropdown.Item href="#action/3.4">Separated link</NavDropdown.Item>
         </NavDropdown>
+      </Nav>
+      <Nav>
+        {props.user !== undefined && props.user !== null ?
+          <NavDropdown title={<span><FontAwesomeIcon icon={faUser} /> {props.user}</span>} id="collasible-nav-dropdown">
+            <NavDropdown.Item href="/#" onClick={() => props.logout()}><FontAwesomeIcon icon={faSignOutAlt} />&nbsp;Logout</NavDropdown.Item>
+          </NavDropdown> :
+          <Nav.Link href="/login"><FontAwesomeIcon icon={faSignInAlt} />&nbsp;Login</Nav.Link>}
       </Nav>
     </Navbar.Collapse>
   </Navbar>

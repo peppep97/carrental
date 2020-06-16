@@ -11,6 +11,7 @@
 } */
 
 .custom-container>.row {
+    padding-top: 60px;
     display: flex;
     flex-flow: column;
     align-items: flex-start;
@@ -18,7 +19,7 @@
 }
 
 .custom-container>.row h2{
-    padding-top: 60px;
+    margin-top: 10px;
 }
 
 
@@ -57,4 +58,28 @@
     overflow: auto;
     width: 100%;
     margin-bottom: 20px;
+}
+.full-width{
+    margin-top: 10px;
+    width: 100%;
+}
+.login-container {
+    padding-top: 60px;
+    margin-top: 2em;
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+}
+
+.login-container>.card {
+    margin-top: 1.5em;
+}
+
+.login-container .btn {
+    width: 100%;
+}
+/* to align dropdown account menu */
+.dropdown-menu { 
+    right: 0 !important;
+    left: auto !important;
 }
