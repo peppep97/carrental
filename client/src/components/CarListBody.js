@@ -8,7 +8,7 @@ import InputGroup from 'react-bootstrap/InputGroup';
 import { Typeahead } from 'react-bootstrap-typeahead';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faList, faCar } from '@fortawesome/free-solid-svg-icons'
+import { faList, faCar, faExclamationCircle } from '@fortawesome/free-solid-svg-icons'
 
 function CarListBody() {
     const [data, setData] = useState([]);
@@ -35,14 +35,14 @@ function CarListBody() {
         setLoading(true);
 
         if (selectedCategories.length === 0 && selectedBrands.length === 0) {
-            setSelectedData(data);
+            setSelectedData(data); //set original values when filters have been cleared
         } else {
             let filteredData = [];
-            if (selectedBrands.length === 0) {
+            if (selectedBrands.length === 0) { //filter only on category if no brands are selected
                 filteredData = data.filter((c) => selectedCategories.find((obj => obj.category === c.category)));
-            } else if (selectedCategories.length === 0) {
+            } else if (selectedCategories.length === 0) { //filter only on brands if no categories are selected
                 filteredData = data.filter((c) => selectedBrands.find((obj => obj === c.brand)));
-            } else {
+            } else { //filter both on categories and brands if they are both selected
                 filteredData = data.filter((c) => selectedCategories.find((obj => obj.category === c.category)) && selectedBrands.find((obj => obj === c.brand)));
             }
             setSelectedData(filteredData);
@@ -50,8 +50,6 @@ function CarListBody() {
 
         setLoading(false);
     }, [data, selectedCategories, selectedBrands]);
-
-
 
     if (loading)
         return <Spinner animation="border" variant="primary" />
@@ -95,6 +93,11 @@ function CarListBody() {
             </Form.Row>
         </Form>
 
+        {selectedData.length === 0 ? 
+        <div className="custom-alert-message">
+            <FontAwesomeIcon icon={faExclamationCircle} size="5x" color="grey"/>
+            <p>No cars match defined filters</p>
+        </div> : 
         <div className="table-wrapper">
             <Table striped bordered hover size="sm">
                 <thead>
@@ -108,7 +111,9 @@ function CarListBody() {
                 <tbody>
                     {selectedData != null ? selectedData.map((e) => <CarRow key={e.id} car={e} />) : ''}
                 </tbody>
-            </Table></div></>
+            </Table>
+        </div>}
+    </>
 }
 
 function CarRow(props) {

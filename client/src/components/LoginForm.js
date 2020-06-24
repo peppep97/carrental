@@ -4,6 +4,8 @@ import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
 import InputGroup from 'react-bootstrap/InputGroup';
+import {Redirect} from "react-router-dom";
+  
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faUser, faKey } from '@fortawesome/free-solid-svg-icons'
@@ -33,7 +35,8 @@ class LoginForm extends React.Component {
     }
 
     render() {
-
+        if (this.props.logged !== undefined && this.props.logged !== null)
+            return <Redirect to="/"></Redirect>
         return <Card
             bg={"light"}
             style={{ width: '20rem' }}>
@@ -89,4 +92,4 @@ class LoginForm extends React.Component {
     }
 }
 
-export { LoginForm };
+export default LoginForm;

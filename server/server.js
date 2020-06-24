@@ -4,6 +4,7 @@ const dao = require('./dao.js');
 const jwt = require('express-jwt');
 const jsonwebtoken = require('jsonwebtoken');
 const cookieParser = require("cookie-parser");
+const { check, validationResult } = require('express-validator');
 
 const PORT = 3001;
 const BASEURI = '/api';
@@ -25,7 +26,7 @@ app.get(BASEURI + '/public', (req, res) => {
 
     dao.getCarList()
         .then((cars) => res.json(cars))
-        .catch((err) => res.status(500).json(dbErrorObj));
+        .catch(() => res.status(503).json(dbErrorObj));
 
 });
 
@@ -44,7 +45,7 @@ app.post(BASEURI + '/login', (req, res) => {
                 res.json({ username: username });
             }
         })
-        .catch((err) => res.status(500).json({ param: 'Server', code: 1, msg: 'wrong username' }));
+        .catch(() => res.status(500).json({ param: 'Server', code: 1, msg: 'wrong username' }));
 
 });
 
@@ -67,10 +68,106 @@ app.get(BASEURI + '/user', (req, res) => {
         .then((user) => {
             res.json({ username: user.username });
         }).catch(
-            (err) => {
-                res.status(401).json(authErrorObj);
+            () => {
+                res.status(503).json(dbErrorObj);
             }
         );
+});
+
+app.get(BASEURI + '/availability', (req, res) => {
+
+    const startDate = req.query.startDate;
+    const endDate = req.query.endDate;
+    const category = req.query.category;
+
+    dao.getCarAvaiability(startDate, endDate, category)
+        .then((availability) => {
+            res.json(availability);
+        }).catch(
+            () => {
+                res.status(503).json(dbErrorObj);
+            }
+        );
+});
+
+app.post(BASEURI + '/pay', [
+    check('cardNumber').isLength({ min: 16, max: 16 }),
+    check('cvv').isLength({ min: 3, max: 3 }),
+    check('expDate').matches("(0[1-9]|1[0-2])\/[0-9]{4}"),
+    check('fullName').exists()
+], (req, res) => {
+
+    const errors = validationResult(req);
+
+    if (errors.isEmpty()) {
+        res.status(200).json({ "status": true });
+    } else {
+        res.status(422).json({ "status": false });
+    }
+});
+
+app.post(BASEURI + '/addrental', [
+    check('startDate').exists(),
+    check('endDate').exists(),
+    check('price').isNumeric(),
+    check('category').exists()
+], (req, res) => {
+
+    const errors = validationResult(req);
+
+    if (errors.isEmpty()) {
+        const startDate = req.body.startDate;
+        const endDate = req.body.endDate;
+        const price = req.body.price;
+        const category = req.body.category;
+
+        if (new Date(endDate) >= new Date(startDate)) {
+            dao.addRental(startDate, endDate, price, category, req.user.username)
+                .then(() => {
+                    res.json({ "status": true });
+                }).catch(
+                    () => {
+                        res.status(503).json(dbErrorObj);
+                    }
+                );
+        }else{
+            res.sendStatus(422);
+        }
+    } else {
+        res.sendStatus(422);
+    }
+});
+
+app.get(BASEURI + '/isfrequent', (req, res) => {
+
+    dao.getFrequentCustomer(req.user.username)
+        .then((count) => {
+            res.json(count);
+        }).catch(
+            () => {
+                res.status(503).json(dbErrorObj);
+            }
+        );
+});
+
+app.get(BASEURI + '/getrentals', (req, res) => {
+
+    const future = req.query.future == "true"; //'covert' to boolean
+
+    dao.getRentalList(future, req.user.username)
+        .then((rentals) => res.json(rentals))
+        .catch(() => res.status(503).json(dbErrorObj));
+
+});
+
+//delete a reservation
+app.delete(BASEURI + '/delete/:reservationId', (req, res) => {
+
+    const reservationId = req.params.reservationId;
+
+    dao.deleteReservation(reservationId, req.user.username)
+        .then(() =>  res.json({ "status": true }))
+        .catch(() => res.status(503).json(dbErrorObj));
 });
 
 
