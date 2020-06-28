@@ -25,30 +25,21 @@ class App extends React.Component {
 
   componentDidMount() {
     //check if the user is authenticated
-    API.isAuthenticated().then(
-      (user) => {
-        this.setState({ user: user.username });
-      }
-    ).catch((err) => {
-      this.setState({ user: null });
-    });
+    API.isAuthenticated()
+      .then((user) => this.setState({ user: user.username }))
+      .catch(() => this.setState({ user: null }));
   }
 
   login = (username, password) => {
 
-    API.login(username, password).then((obj) => {
-      this.setState({ loginError: null, user: obj.username });
-      //this.loadInitialData();
-    })
-      .catch((err) => {
-        this.setState({ loginError: err.code });
-      });
-
+    API.login(username, password)
+      .then((obj) => this.setState({ loginError: null, user: obj.username }))
+      .catch((err) => this.setState({ loginError: err.code }));
   }
 
   logout = () => {
     API.logout().then(() => {
-      setTimeout(() => { this.setState({ user: null }) }, 300);
+      setTimeout(() => this.setState({ user: null }), 300);
     });
   }
 
@@ -63,29 +54,30 @@ class App extends React.Component {
               <LoginForm onLogin={this.login} loginError={this.state.loginError} logged={this.state.user}></LoginForm>
             </Container>
           </Route>
-          <Route path="/myrentals">
-            <Container className="custom-container">
+          <Route path="/myrentals" render={(props) => {
+            const showFuture = props.location.state !== undefined ? props.location.state.showFuture : false; //indicate if show future rentals or pasts when my rentals page is opened
+            return <Container className="custom-container">
               <Row>
-                <MyRentalsBody></MyRentalsBody>
+                <MyRentalsBody showFuture={showFuture}></MyRentalsBody>
               </Row>
             </Container>
+          }}>
           </Route>
           <Route path="/" render={() => {
             if (this.state.user === null)
               return <Container className="custom-container">
                 <Row>
-                  <CarListBody/>
+                  <CarListBody />
                 </Row>
               </Container>
             return <Container className="config-container">
               <Row>
-                <CarRentalConfig/>
+                <CarRentalConfig />
               </Row>
             </Container>
           }}>
           </Route>
         </Switch>
-
       </Router>
     </div>
 

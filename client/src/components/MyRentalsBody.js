@@ -10,29 +10,33 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faExclamationCircle, faTrashAlt } from '@fortawesome/free-solid-svg-icons'
 import Row from 'react-bootstrap/Row';
 
-function MyRentalsBody() {
+function MyRentalsBody(props) {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [futureRentals, setFutureRentals] = useState(true);
+    const [futureRentals, setFutureRentals] = useState(props.showFuture);
 
-    async function getData() {
-        setLoading(true);
+    useEffect(() =>  {
+        async function getData(){
+            setLoading(true);
 
-        const rentals = await API.getRentalList(futureRentals);
-        setData(rentals);
-
-        setLoading(false);
-    }
-
-    useEffect(() => {
+            const rentals = await API.getRentalList(futureRentals);
+            setData(rentals);
+    
+            setLoading(false);
+        }
         getData();
-    }, [futureRentals]);
+    }, [futureRentals, props.showFuture]);
 
     const deleteRental = async (id) => {
 
         const res = await API.deleteReservation(id);
         if (res.status === true){
-            getData();
+            setLoading(true);
+
+            const rentals = await API.getRentalList(futureRentals);
+            setData(rentals);
+    
+            setLoading(false);
         }
     };
 
@@ -57,7 +61,7 @@ function MyRentalsBody() {
                                 <th>End date</th>
                                 <th>Category</th>
                                 <th>Price</th>
-                                {futureRentals ? <th>Action</th> : ''}
+                                {futureRentals ? <th>Action</th> : <></>}
                             </tr>
                         </thead>
                         <tbody>
@@ -76,8 +80,8 @@ function CarRow(props) {
             <td>{moment(props.rental.startDate).format("DD-MM-YYYY")}</td>
             <td>{moment(props.rental.endDate).format("DD-MM-YYYY")}</td>
             <td>{props.rental.category}</td>
-            <td>{props.rental.price} €</td>
-            {props.futureRentals ? <td><Button variant="link" size="sm" onClick={() => setShowDelete(true)}> <FontAwesomeIcon icon={faTrashAlt} /></Button></td> : ''}
+            <td>{props.rental.price} €/day</td>
+            {props.futureRentals ? <td><Button variant="link" size="sm" onClick={() => setShowDelete(true)}> <FontAwesomeIcon icon={faTrashAlt} /></Button></td> : <></>}
         </tr>
         <DeleteModal rentalId={props.rental.id} show={showDelete} setShowDelete={setShowDelete} deleteRental={props.deleteRental}></DeleteModal>
     </>

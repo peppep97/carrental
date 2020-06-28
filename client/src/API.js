@@ -1,5 +1,4 @@
-
-const APIURL = 'http://localhost:3000/api';
+const APIURL = 'api';
 
 async function isAuthenticated() {
 
@@ -40,29 +39,27 @@ async function login(username, password) {
         }).then((response) => {
             if (response.ok) {
                 response.json()
-                    .then((obj) => { resolve(obj); })
-                    .catch((err) => { reject({ errors: [{ param: "Application", msg: "Cannot parse server response" }] }) });
+                    .then((obj) => resolve(obj))
+                    .catch((err) =>  reject(err));
             } else {
                 response.json()
-                    .then((obj) => { reject(obj); }) //to send username/password errors
-                    .catch((err) => { reject({ errors: [{ param: "Application", msg: "Cannot parse server response" }] }) });
+                    .then((obj) => reject(obj)) //to send username/password errors
+                    .catch((err) => reject(err));
             }
-        }).catch((err) => { reject({ errors: [{ param: "Server", msg: "Cannot communicate" }] }) });
+        }).catch((err) => reject(err));
     });
 }
 
 async function logout() {
-    return new Promise((resolve, reject) => {
-        fetch(APIURL + '/logout', {
-            method: 'POST'
-        }).then((response) => {
-            if (response.ok) {
-                resolve(null);
-            } else {
-                reject(null);
-            }
-        }).catch((err) => reject(err));
+    const url = APIURL + '/logout';
+    const response = await fetch(url, {
+        method: 'POST'
     });
+    if (response.ok) {
+        return;
+    } else {
+        throw response;
+    }
 }
 
 async function getCarAvaiability(startDate, endDate, category) {

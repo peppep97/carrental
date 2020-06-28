@@ -18,13 +18,11 @@
     margin-top: 10px;
 }
 
-
-.custom-container> .row td {
+.custom-container>.row td {
     vertical-align: middle !important;
 }
 
-
-.custom-container > .row .spinner-border {
+.custom-container>.row .spinner-border {
     align-self: center;
     margin-top: 10em;
     width: 3rem;
@@ -35,12 +33,12 @@
     width: 100%;
 }
 
-.custom-container > .row .title-row{
+.custom-container>.row .title-row {
     width: 100%;
     justify-content: space-between;
 }
 
-.custom-container > .row .title-row .custom-switch{
+.custom-container>.row .title-row .custom-switch {
     align-self: center;
 }
 
@@ -75,7 +73,7 @@
     margin-top: 1em;
 }
 
-.config-container > .row {
+.config-container>.row {
     padding-top: 60px;
     display: flex;
     flex-flow: column;
@@ -87,7 +85,7 @@
     margin-top: 10px;
 }
 
-.config-container > .row .spinner-border {
+.config-container>.row .spinner-border {
     align-self: center;
     margin-top: 5em;
     width: 3rem;
@@ -102,7 +100,7 @@
     justify-content: space-between !important;
 }
 
-.custom-footer p{
+.custom-footer p {
     font-weight: bold;
 }
 
@@ -121,30 +119,37 @@
     align-self: center;
 }
 
-.custom-alert-message p{
+.custom-alert-message p {
     margin-top: 10px;
     color: grey;
 }
 
-.reservation-table{
+.reservation-table {
     margin-top: 15px;
     align-self: center;
 }
 
-.reservation-table td{
+.reservation-table td {
     text-align: center;
     vertical-align: middle;
 }
 
-.toast{
+.toast {
     position: absolute;
     right: 10px;
     bottom: 10px;
 }
 
+.toast .toast-body {
+    color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
+
 .dropdown-menu {
     box-shadow: 0 6px 12px rgba(0, 0, 0, .175) !important;
 }
+
 /*date picker custom style*/
 
 .react-datepicker-wrapper {

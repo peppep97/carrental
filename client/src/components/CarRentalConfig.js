@@ -9,7 +9,6 @@ import Button from 'react-bootstrap/Button';
 import InputGroup from 'react-bootstrap/InputGroup';
 import DatePicker from "react-datepicker";
 import Modal from 'react-bootstrap/Modal';
-import Toast from 'react-bootstrap/Toast';
 import moment from 'moment';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -32,6 +31,7 @@ function CarRentalConfig() {
     const [ageInvalid, setAgeInvalid] = useState(false);
     const [availableCar, setAvailableCar] = useState(-1);
     const [price, setPrice] = useState(-1);
+    const [basePrice, setBasePrice] = useState(0);
 
     //set reference to the form
     const configForm = useRef(null);
@@ -50,13 +50,13 @@ function CarRentalConfig() {
                 const tot = res.tot;
                 const busy = res.busy;
 
-                const resFrequent = API.getFrequentCustomer();
+                const resFrequent = await API.getFrequentCustomer();
                 const finishedRental = resFrequent.count;
 
-                if (tot - busy > 0) {
+                if (tot - busy > 0) { //check if there are available cars of that category on specified period
                     //compute price
 
-                    let price = categories.filter(c => c.category === category).map(c => c.price);
+                    let price = basePrice;
                     price = price * kmPerDay * extraDrivers;
 
                     if (age < 25)
@@ -67,10 +67,10 @@ function CarRentalConfig() {
                     if (extraInsurance === true)
                         price *= 1.20;
 
-                    if (busy / price < 0.10)
+                    if ((tot - busy) / tot < 0.10)
                         price *= 1.10;
 
-                    if (finishedRental >= 3)
+                    if (finishedRental >= 3) //if user is frequent customer
                         price *= 0.90;
 
                     price = price.toFixed(2);
@@ -87,7 +87,7 @@ function CarRentalConfig() {
         }
         validateForm();
 
-    }, [startDate, endDate, category, age, extraDrivers, kmPerDay, extraInsurance]);
+    }, [startDate, endDate, category, age, extraDrivers, kmPerDay, extraInsurance, basePrice]);
 
     return <><h2>Car Rental</h2>
         <Card
@@ -136,9 +136,9 @@ function CarRentalConfig() {
                     <Form.Row>
                         <Form.Group as={Col}>
                             <Form.Label>Car Category</Form.Label>
-                            <Form.Control as="select" custom required onChange={e => setCategory(e.target.value)}>
-                                <option value="" selected hidden >Select category</option>
-                                {categories.map(c => <option value={c.category}>{c.category}</option>)}
+                            <Form.Control as="select" custom required defaultValue="" onChange={e => { setBasePrice(e.target.value); setCategory(e.target.selectedOptions[0].text); }}>
+                                <option value="" hidden >Select category</option>
+                                {categories.map((c, i) => <option key={i} value={c.price}>{c.category}</option>)}
                             </Form.Control>
                         </Form.Group>
                         <Form.Group as={Col}>
@@ -150,8 +150,8 @@ function CarRentalConfig() {
                         </Form.Group>
                         <Form.Group as={Col}>
                             <Form.Label>Number of extra divers</Form.Label>
-                            <Form.Control as="select" custom required onChange={e => setExtraDrivers(e.target.value)}>
-                                <option value="" selected hidden>Select extra drivers</option>
+                            <Form.Control as="select" custom required defaultValue="" onChange={e => setExtraDrivers(e.target.value)}>
+                                <option value="" hidden>Select extra drivers</option>
                                 <option value={1}>0</option>
                                 <option value={1.15}>1</option>
                                 <option value={1.15}>2</option>
@@ -215,7 +215,7 @@ function TableResult(props) {
             <tbody>
                 <tr>
                     <td>{props.availableCar}</td>
-                    <td>{props.price} €</td>
+                    <td>{props.price} €/day</td>
                     <td><Button variant="primary" onClick={() => setShow(true)} ><FontAwesomeIcon icon={faShoppingCart} />&nbsp;Rent a car</Button></td>
                 </tr>
             </tbody>
@@ -231,7 +231,6 @@ function PaymentModal(props) {
     const [cvv, setCvv] = useState("");
     const [expDate, setExpDate] = useState("");
     const [fullName, setFullName] = useState("");
-    const [showToast, setShowToast] = useState(false);
     const [rentalAdded, setRentalAdded] = useState(false);
 
     const paymentForm = useRef(null);
@@ -253,11 +252,10 @@ function PaymentModal(props) {
                         API.addRental(rental)
                             .then(res => {
                                 if (res.status === true) {
-                                    setShowToast(true);
                                     props.setShow(false);
                                     setRentalAdded(true);
                                 }
-                            })
+                            });
                     }
                 });
 
@@ -267,13 +265,13 @@ function PaymentModal(props) {
         }
     }
 
-    const handleClose = () => props.setShow(false);
-
-    if (rentalAdded)
-        return <Redirect to="/"></Redirect>
-
+    //redirect to My Rentals page when a reservation has been insterted
+    if (rentalAdded) {
+        const showFuture = moment(props.startDate).isAfter(moment().toDate());
+        return <Redirect to={{ pathname: "/myrentals", state: { showFuture: showFuture } }}></Redirect>
+    }
     return <>
-        <Modal show={props.show} onHide={handleClose} backdrop="static" centered>
+        <Modal show={props.show} onHide={() => props.setShow(false)} backdrop="static" centered>
             <Modal.Header closeButton>
                 <Modal.Title>Payment Details</Modal.Title>
             </Modal.Header>
@@ -288,6 +286,9 @@ function PaymentModal(props) {
                                 </InputGroup.Prepend>
                                 <Form.Control type="text" placeholder="Enter credit card number" required minLength="16" maxLength="16" pattern="[0-9]{16}"
                                     onChange={e => setCardNumber(e.target.value)} />
+                                <Form.Control.Feedback type="invalid">
+                                    Provide a valid credit card number (16 numbers)
+                                </Form.Control.Feedback>
                             </InputGroup>
                         </Form.Group>
                     </Form.Row>
@@ -300,6 +301,9 @@ function PaymentModal(props) {
                                 </InputGroup.Prepend>
                                 <Form.Control type="password" placeholder="Enter CVV" required minLength="3" maxLength="3" pattern="[0-9]{3}"
                                     onChange={e => setCvv(e.target.value)} />
+                                <Form.Control.Feedback type="invalid">
+                                    Provide a valid CVV (3 numbers)
+                                </Form.Control.Feedback>
                             </InputGroup>
                         </Form.Group>
                         <Form.Group as={Col}>
@@ -308,8 +312,11 @@ function PaymentModal(props) {
                                 <InputGroup.Prepend>
                                     <InputGroup.Text><FontAwesomeIcon icon={faCalendarAlt} /></InputGroup.Text>
                                 </InputGroup.Prepend>
-                                <Form.Control type="text" placeholder="MM/YYYY" required minLength="7" maxLength="7" pattern="(0[1-9]|1[0-2])\/[0-9]{4}"
+                                <Form.Control type="text" placeholder="MM/YYYY" required minLength="7" maxLength="7" pattern="(0[1-9]|1[0-2])\/[1-9][0-9]{3}"
                                     onChange={e => setExpDate(e.target.value)} />
+                                <Form.Control.Feedback type="invalid">
+                                    Provide a valid expiration date (format MM/YYYY)
+                                </Form.Control.Feedback>
                             </InputGroup>
                         </Form.Group>
                     </Form.Row>
@@ -321,6 +328,9 @@ function PaymentModal(props) {
                                     <InputGroup.Text><FontAwesomeIcon icon={faUser} /></InputGroup.Text>
                                 </InputGroup.Prepend>
                                 <Form.Control type="text" placeholder="Enter full name" required onChange={e => setFullName(e.target.value)} />
+                                <Form.Control.Feedback type="invalid">
+                                    Provide a full name
+                                </Form.Control.Feedback>
                             </InputGroup>
                         </Form.Group>
                     </Form.Row>
@@ -328,19 +338,13 @@ function PaymentModal(props) {
                 </Modal.Body>
 
                 <Modal.Footer className="custom-footer">
-                    <p>Total: {props.price} €</p>
+                    <p>Total: {props.price} €/day</p>
                     <Button variant="primary" type="submit">
                         Confirm payment
             </Button>
                 </Modal.Footer>
             </Form>
         </Modal>
-        <Toast onClose={() => setShowToast(false)} show={showToast} delay={3000} autohide>
-            <Toast.Header>
-                <strong className="mr-auto">Car Rental</strong>
-            </Toast.Header>
-            <Toast.Body>Rental successfully added!</Toast.Body>
-        </Toast>
     </>
 }
 
