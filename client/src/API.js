@@ -6,10 +6,11 @@ async function isAuthenticated() {
 
     const response = await fetch(url);
     const user = await response.json();
+
     if (response.ok) {
         return user;
     } else {
-        throw response;
+        throw response.status;
     }
 }
 
@@ -23,7 +24,7 @@ async function getCarList() {
     if (response.ok) {
         return cars;
     } else {
-        throw response;
+        throw response.status;
     }
 }
 
@@ -40,7 +41,7 @@ async function login(username, password) {
             if (response.ok) {
                 response.json()
                     .then((obj) => resolve(obj))
-                    .catch((err) =>  reject(err));
+                    .catch((err) => reject(err));
             } else {
                 response.json()
                     .then((obj) => reject(obj)) //to send username/password errors
@@ -58,7 +59,7 @@ async function logout() {
     if (response.ok) {
         return;
     } else {
-        throw response;
+        throw response.status;
     }
 }
 
@@ -72,7 +73,7 @@ async function getCarAvaiability(startDate, endDate, category) {
     if (response.ok) {
         return res;
     } else {
-        throw response;
+        throw response.status;
     }
 }
 
@@ -93,7 +94,7 @@ async function pay(payload) {
     if (response.ok) {
         return res;
     } else {
-        throw response;
+        throw response.status;
     }
 }
 
@@ -114,7 +115,7 @@ async function addRental(rental) {
     if (response.ok) {
         return res;
     } else {
-        throw response;
+        throw response.status;
     }
 }
 
@@ -128,7 +129,7 @@ async function getFrequentCustomer() {
     if (response.ok) {
         return res;
     } else {
-        throw response;
+        throw response.status;
     }
 }
 
@@ -142,7 +143,7 @@ async function getRentalList(futureRentals) {
     if (response.ok) {
         return cars;
     } else {
-        throw response;
+        throw response.status;
     }
 }
 
@@ -157,7 +158,7 @@ async function deleteReservation(reservationId) {
     if (response.ok) {
         return res;
     } else {
-        throw response;
+        throw response.status;
     }
 }
 

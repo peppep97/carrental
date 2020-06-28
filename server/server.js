@@ -10,6 +10,7 @@ const PORT = 3001;
 const BASEURI = '/api';
 
 const dbErrorObj = { 'param': 'Server', 'msg': 'Database error' };
+const authErrorObj = { 'param': 'Server', 'msg': 'Authorization error' };
 
 const jwtSecret = "9SMivhSVEMs8KMz3nSvEsbnTBT4YkKaY4pnS957cDG7BID6Z7ZpxUC0jgnEqR0Zm";
 
@@ -66,6 +67,12 @@ app.use(
     })
 );
 
+//to handle each UnauthorizedError
+app.use(function (err, req, res, next) {
+    if (err.name === 'UnauthorizedError') {
+        res.status(401).json(authErrorObj);
+    }
+});
 
 //get a user info (used by client to reauthenticate itself - getting its user info)
 app.get(BASEURI + '/user', (req, res) => {
