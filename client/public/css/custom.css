@@ -134,18 +134,6 @@
     vertical-align: middle;
 }
 
-.toast {
-    position: absolute;
-    right: 10px;
-    bottom: 10px;
-}
-
-.toast .toast-body {
-    color: #155724;
-    background-color: #d4edda;
-    border-color: #c3e6cb;
-}
-
 .dropdown-menu {
     box-shadow: 0 6px 12px rgba(0, 0, 0, .175) !important;
 }
@@ -180,9 +168,3 @@
 .react-datepicker__day-names {
     font-weight: bold !important;
 }
-
-/* 
-select option[hidden]:first-child {
-    color: #6c757d;
-    opacity: 1;
-} */

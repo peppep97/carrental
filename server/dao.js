@@ -54,7 +54,6 @@ exports.login = function (username, password) {
                         }
                     });
                 }
-
             }
         });
     });
@@ -107,7 +106,7 @@ exports.getFrequentCustomer = function (user) {
 
 exports.getRentalList = function (future, user) {
     return new Promise((resolve, reject) => {
-        const sql = `SELECT id, startDate, endDate, category, price FROM rental where ${future == true ? "startDate > date('now')" : "startDate <= date('now')"}  and user = ?`;
+        const sql = `SELECT id, startDate, endDate, category, price FROM rental where ${future == true ? "startDate > date('now')" : "startDate <= date('now')"}  and user = ? ORDER BY ${future == true ? "startDate"  : "startDate DESC"}`;
         db.all(sql, [user], (err, cars) => {
             if (err) {
                 reject(err);

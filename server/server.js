@@ -9,8 +9,8 @@ const { check, validationResult } = require('express-validator');
 const PORT = 3001;
 const BASEURI = '/api';
 
-const dbErrorObj = { errors: [{ 'param': 'Server', 'msg': 'Database error' }] };
-const authErrorObj = { errors: [{ 'param': 'Server', 'msg': 'Authorization error' }] };
+const dbErrorObj = { 'param': 'Server', 'msg': 'Database error' };
+const authErrorObj = { 'param': 'Server', 'msg': 'Authorization error' };
 
 const jwtSecret = "9SMivhSVEMs8KMz3nSvEsbnTBT4YkKaY4pnS957cDG7BID6Z7ZpxUC0jgnEqR0Zm";
 
@@ -25,7 +25,7 @@ const expireTime = 3600 * 24 * 7; //7 days
 app.get(BASEURI + '/public', (req, res) => {
 
     dao.getCarList()
-        .then((cars) => res.json(cars))
+        .then((cars) => res.status(200).json(cars))
         .catch(() => res.status(503).json(dbErrorObj));
 
 });
@@ -42,7 +42,7 @@ app.post(BASEURI + '/login', (req, res) => {
             } else {
                 const token = jsonwebtoken.sign({ username: username }, jwtSecret, { expiresIn: expireTime });
                 res.cookie('token', token, { httpOnly: true, sameSite: true, maxAge: 1000 * expireTime });
-                res.json({ username: username });
+                res.status(200).json({ username: username });
             }
         })
         .catch(() => res.status(500).json({ param: 'Server', code: 1, msg: 'wrong username' }));
@@ -54,7 +54,7 @@ app.post(BASEURI + '/logout', (req, res) => {
 });
 
 
-// For the rest of the code, all APIs require authentication
+//all next APIs require authentication
 app.use(
     jwt({
         secret: jwtSecret,
@@ -62,18 +62,16 @@ app.use(
     })
 );
 
+
+//get a user info (used by client to reauthenticate itself - getting its user info)
 app.get(BASEURI + '/user', (req, res) => {
     const username = req.user.username;
     dao.getUserById(username)
-        .then((user) => {
-            res.json({ username: user.username });
-        }).catch(
-            () => {
-                res.status(503).json(dbErrorObj);
-            }
-        );
+        .then((user) => res.status(200).json({ username: user.username }))
+        .catch(() => res.status(503).json(dbErrorObj));
 });
 
+//get number of available car of a given category for a given period
 app.get(BASEURI + '/availability', (req, res) => {
 
     const startDate = req.query.startDate;
@@ -81,19 +79,15 @@ app.get(BASEURI + '/availability', (req, res) => {
     const category = req.query.category;
 
     dao.getCarAvaiability(startDate, endDate, category)
-        .then((availability) => {
-            res.json(availability);
-        }).catch(
-            () => {
-                res.status(503).json(dbErrorObj);
-            }
-        );
+        .then((availability) => res.status(200).json(availability))
+        .catch(() => res.status(503).json(dbErrorObj));
 });
 
+//stub payment api
 app.post(BASEURI + '/pay', [
     check('cardNumber').isLength({ min: 16, max: 16 }),
     check('cvv').isLength({ min: 3, max: 3 }),
-    check('expDate').matches("(0[1-9]|1[0-2])\/[0-9]{4}"),
+    check('expDate').matches("(0[1-9]|1[0-2])\/[1-9][0-9]{3}"),
     check('fullName').exists()
 ], (req, res) => {
 
@@ -106,6 +100,7 @@ app.post(BASEURI + '/pay', [
     }
 });
 
+//add a rental
 app.post(BASEURI + '/addrental', [
     check('startDate').exists(),
     check('endDate').exists(),
@@ -123,14 +118,9 @@ app.post(BASEURI + '/addrental', [
 
         if (new Date(endDate) >= new Date(startDate)) {
             dao.addRental(startDate, endDate, price, category, req.user.username)
-                .then(() => {
-                    res.json({ "status": true });
-                }).catch(
-                    () => {
-                        res.status(503).json(dbErrorObj);
-                    }
-                );
-        }else{
+                .then(() => res.status(200).json({ "status": true }))
+                .catch(() => res.status(503).json(dbErrorObj));
+        } else {
             res.sendStatus(422);
         }
     } else {
@@ -138,16 +128,12 @@ app.post(BASEURI + '/addrental', [
     }
 });
 
+//check if user is a frequent user
 app.get(BASEURI + '/isfrequent', (req, res) => {
 
     dao.getFrequentCustomer(req.user.username)
-        .then((count) => {
-            res.json(count);
-        }).catch(
-            () => {
-                res.status(503).json(dbErrorObj);
-            }
-        );
+        .then((count) => res.json(count))
+        .catch(() => res.status(503).json(dbErrorObj));
 });
 
 app.get(BASEURI + '/getrentals', (req, res) => {
@@ -166,7 +152,7 @@ app.delete(BASEURI + '/delete/:reservationId', (req, res) => {
     const reservationId = req.params.reservationId;
 
     dao.deleteReservation(reservationId, req.user.username)
-        .then(() =>  res.json({ "status": true }))
+        .then(() => res.json({ "status": true }))
         .catch(() => res.status(503).json(dbErrorObj));
 });
 
