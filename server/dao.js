@@ -93,7 +93,6 @@ exports.getFrequentCustomer = function (user) {
     return new Promise((resolve, reject) => {
         const sql = `select COUNT(*) as count from rental where endDate < date('now') and user = ?`;
         db.get(sql, [user], (err, res) => {
-            console.log(sql);
             if (err) {
                 reject(err);
             } else {

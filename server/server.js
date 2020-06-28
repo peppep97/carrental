@@ -10,7 +10,6 @@ const PORT = 3001;
 const BASEURI = '/api';
 
 const dbErrorObj = { 'param': 'Server', 'msg': 'Database error' };
-const authErrorObj = { 'param': 'Server', 'msg': 'Authorization error' };
 
 const jwtSecret = "9SMivhSVEMs8KMz3nSvEsbnTBT4YkKaY4pnS957cDG7BID6Z7ZpxUC0jgnEqR0Zm";
 
@@ -45,7 +44,12 @@ app.post(BASEURI + '/login', (req, res) => {
                 res.status(200).json({ username: username });
             }
         })
-        .catch(() => res.status(500).json({ param: 'Server', code: 1, msg: 'wrong username' }));
+        .catch((err) => {
+            if (err == null)
+                res.status(500).json({ param: 'Server', code: 1, msg: 'wrong username' });
+            else
+                res.status(503).json(dbErrorObj);
+        });
 
 });
 
